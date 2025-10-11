@@ -15,6 +15,7 @@ class App {
     this.setupUI();
     await this.loadData();
     this.setupEventListeners();
+    this.loadFromURL(); // Cargar departamento desde URL
   }
 
   private setupUI(): void {
@@ -274,7 +275,13 @@ class App {
 
   private setupEventListeners(): void {
     const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
-    deptSelect.addEventListener('change', () => this.handleDepartmentChange(deptSelect.value));
+    deptSelect.addEventListener('change', () => {
+      this.handleDepartmentChange(deptSelect.value);
+      this.updateURL(deptSelect.value); // Actualizar URL cuando cambia selección
+    });
+
+    // Escuchar cambios en la URL (botón atrás/adelante del navegador)
+    window.addEventListener('hashchange', () => this.loadFromURL());
 
     document.querySelectorAll('input[name="displayOption"]').forEach(radio => {
       radio.addEventListener('change', (e) => {
@@ -404,6 +411,48 @@ class App {
     document.getElementById('btn-descargar')!.style.display = 'inline-block';
     document.getElementById('btn-copiar')!.style.display = 'inline-block';
     document.getElementById('btn-descargar-todos')!.style.display = 'none';
+  }
+
+  private updateURL(departmentCode: string): void {
+    if (!departmentCode || departmentCode === 'ALL') {
+      // Limpiar hash si no hay departamento o es "todos"
+      if (window.location.hash) {
+        history.pushState(null, '', window.location.pathname);
+      }
+      return;
+    }
+
+    const dept = CONFIG.departmentCodes.find(d => d.code === departmentCode);
+    if (dept) {
+      const slug = this.createSlug(dept.name);
+      history.pushState(null, '', `#${slug}`);
+    }
+  }
+
+  private loadFromURL(): void {
+    const hash = window.location.hash.slice(1); // Remover el #
+    if (!hash) return;
+
+    // Buscar departamento por slug
+    const dept = CONFIG.departmentCodes.find(d => 
+      this.createSlug(d.name) === hash
+    );
+
+    if (dept) {
+      const select = document.getElementById('departamento') as HTMLSelectElement;
+      select.value = dept.code;
+      this.handleDepartmentChange(dept.code);
+    }
+  }
+
+  private createSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD') // Descomponer caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, '') // Eliminar diacríticos
+      .replace(/\s+/g, '-') // Espacios a guiones
+      .replace(/[^a-z0-9-]/g, '') // Solo letras, números y guiones
+      .replace(/-+/g, '-'); // Múltiples guiones a uno solo
   }
 }
 
