@@ -16,10 +16,12 @@
         "vite",
         "typescript"
     ],
+    "homepage": "https://hrevueltas.github.io/departamentos-colombia-svg/",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "deploy": "npm run build && gh-pages -d dist"
     },
     "devDependencies": {
         "typescript": "~5.9.3",

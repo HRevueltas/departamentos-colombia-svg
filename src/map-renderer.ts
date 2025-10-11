@@ -16,10 +16,10 @@ export class MapRenderer {
       .attr('id', 'mapa-svg')
       .attr('viewBox', `0 0 ${CONFIG.mapWidth} ${CONFIG.mapHeight}`)
       .attr('preserveAspectRatio', 'xMidYMid meet')
-      .style('width', '100%')
-      .style('height', '100%')
-      .style('max-width', '100%')
-      .style('max-height', '100%');
+      // .style('width', '100%')
+      // .style('height', '100%')
+      // .style('max-width', '100%')
+      // .style('max-height', '100%');
 
     this.projection = d3.geoMercator();
     this.path = d3.geoPath().projection(this.projection);
