@@ -7,7 +7,7 @@
 
 Herramienta web para generar y descargar mapas vectoriales SVG de los 32 departamentos de Colombia con sus municipios y el distrito capital. Utiliza datos oficiales del DANE 2018.
 
-🔗 **Demo**:
+🔗 **Demo**: [https://hrevueltas.github.io/departamentos-colombia-svg/](https://hrevueltas.github.io/departamentos-colombia-svg/)
 
 ## ¿Qué hace?
 
