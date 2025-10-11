@@ -56,7 +56,6 @@ Ver archivo [LICENSE](LICENSE) para más detalles.
 - **[caticoa3](https://github.com/caticoa3)** - Procesamiento y conversión a GeoJSON
 - **D3.js Team** - Librería de visualización
 - **Vite Team** - Build tool moderno
-
 ---
 
 Hecho con ❤️ por [Hrevueltas](https://github.com/Hrevueltas) 
