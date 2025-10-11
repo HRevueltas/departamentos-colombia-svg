@@ -86,12 +86,12 @@ import{s as v,m as b,i as y,z as S,a as h}from"./d3-DK4Cgk9G.js";import{r as E,g
                       id="btn-descargar-todos" 
                       class="btn btn-accent"
                       style="display: none;"
-                      aria-label="Descargar archivo ZIP con todos los 33 departamentos"
-                      data-tooltip="Descarga un ZIP con los 33 departamentos"
+                      aria-label="Descargar archivo ZIP con todos los 32 departamentos"
+                      data-tooltip="Descarga un ZIP con los 32 departamentos"
                     >
                       <span class="btn-icon"><i class="fa-solid fa-file-zipper"></i></span>
                       <span class="btn-text">Descargar ZIP</span>
-                      <span class="btn-badge">33 dptos</span>
+                      <span class="btn-badge">32 dptos y el distrito capital</span>
                     </button>
                   </div>
                 </div>
@@ -253,4 +253,4 @@ import{s as v,m as b,i as y,z as S,a as h}from"./d3-DK4Cgk9G.js";import{r as E,g
           <p>Opción "Todos los departamentos" seleccionada</p>
           <p class="placeholder-hint">Usa el botón "Descargar Todos (ZIP)" para obtener todos los mapas</p>
         `);return}if(e&&(e.style.display="none"),n.isAllDepartments=!1,this.hideDownloadAllButton(),!n.allData.departamentos)return;const o=n.allData.departamentos.features.filter(a=>a.properties.DPTO_CCDGO===t);this.mapRenderer.renderMapa(o),this.mapRenderer.renderMunicipios(t),n.displayOption==="map+labels"?this.mapRenderer.renderEtiquetas(o):n.displayOption==="map+points"&&this.mapRenderer.renderPuntos(o),this.codeViewer.updateSVGCode(),this.enableButtons()}enableButtons(){document.getElementById("btn-descargar").disabled=!1,document.getElementById("btn-copiar").disabled=!1}disableButtons(){document.getElementById("btn-descargar").disabled=!0,document.getElementById("btn-copiar").disabled=!0}showDownloadAllButton(){document.getElementById("btn-descargar").style.display="none",document.getElementById("btn-copiar").style.display="none",document.getElementById("btn-descargar-todos").style.display="inline-block"}hideDownloadAllButton(){document.getElementById("btn-descargar").style.display="inline-block",document.getElementById("btn-copiar").style.display="inline-block",document.getElementById("btn-descargar-todos").style.display="none"}updateURL(t){if(!t||t==="ALL"){window.location.hash&&history.pushState(null,"",window.location.pathname);return}const e=r.departmentCodes.find(o=>o.code===t);if(e){const o=this.createSlug(e.name);history.pushState(null,"",`#${o}`)}}loadFromURL(){const t=window.location.hash.slice(1);if(!t)return;const e=r.departmentCodes.find(o=>this.createSlug(o.name)===t);if(e){const o=document.getElementById("departamento");o.value=e.code,this.handleDepartmentChange(e.code)}}createSlug(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"").replace(/-+/g,"-")}}const O=new G;O.init();
-//# sourceMappingURL=index-BC1l6zPX.js.map
+//# sourceMappingURL=index-C0ES7jYC.js.map
