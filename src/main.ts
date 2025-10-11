@@ -89,12 +89,12 @@ class App {
                       id="btn-descargar-todos" 
                       class="btn btn-accent"
                       style="display: none;"
-                      aria-label="Descargar archivo ZIP con todos los 33 departamentos"
-                      data-tooltip="Descarga un ZIP con los 33 departamentos"
+                      aria-label="Descargar archivo ZIP con todos los 32 departamentos"
+                      data-tooltip="Descarga un ZIP con los 32 departamentos"
                     >
                       <span class="btn-icon"><i class="fa-solid fa-file-zipper"></i></span>
                       <span class="btn-text">Descargar ZIP</span>
-                      <span class="btn-badge">33 dptos</span>
+                      <span class="btn-badge">32 dptos y el distrito capital</span>
                     </button>
                   </div>
                 </div>
