@@ -35,15 +35,11 @@ npm run build
 ```
 
 
-
 ## Tecnologías
 
 - **Vite** + **TypeScript** - Base del proyecto
 - **D3.js** - Proyecciones geográficas y renderizado SVG
 - **JSZip** - Generación de archivos ZIP
-
-
-
 
 
 ## Licencia
