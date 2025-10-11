@@ -9,8 +9,6 @@ Herramienta web para generar y descargar mapas vectoriales SVG de los 32 departa
 
 🔗 **Demo**:
 
-
-
 ## ¿Qué hace?
 
 Genera mapas SVG editables de cualquier departamento colombiano con tres opciones de visualización:
