@@ -213,6 +213,15 @@ class App {
                 </div>
                 <div class="code-header-actions">
                   <button 
+                    id="btn-descargar-code" 
+                    class="download-code-btn" 
+                    title="Descargar archivo SVG"
+                    aria-label="Descargar archivo SVG"
+                    disabled
+                  >
+                    <i class="fa-solid fa-download"></i> Descargar
+                  </button>
+                  <button 
                     class="copy-code-btn" 
                     title="Copiar código al portapapeles"
                     aria-label="Copiar código SVG al portapapeles"
@@ -318,6 +327,13 @@ class App {
     document.querySelector('.copy-code-btn')?.addEventListener('click', () => {
       this.codeViewer.copyCodeToClipboard();
     });
+
+    document.getElementById('btn-descargar-code')?.addEventListener('click', () => {
+      const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
+      const selectedDept = deptSelect.value;
+      const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
+      this.svgExporter.downloadSingleDepartment(selectedDept, deptName);
+    });
     
     document.getElementById('zoom-in')?.addEventListener('click', () => {
       this.mapRenderer.zoomIn();
@@ -394,11 +410,13 @@ class App {
   private enableButtons(): void {
     (document.getElementById('btn-descargar') as HTMLButtonElement).disabled = false;
     (document.getElementById('btn-copiar') as HTMLButtonElement).disabled = false;
+    (document.getElementById('btn-descargar-code') as HTMLButtonElement).disabled = false;
   }
 
   private disableButtons(): void {
     (document.getElementById('btn-descargar') as HTMLButtonElement).disabled = true;
     (document.getElementById('btn-copiar') as HTMLButtonElement).disabled = true;
+    (document.getElementById('btn-descargar-code') as HTMLButtonElement).disabled = true;
   }
 
   private showDownloadAllButton(): void {
