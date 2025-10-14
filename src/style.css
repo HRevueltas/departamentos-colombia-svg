@@ -89,7 +89,7 @@ body {
 
 /* Desktop: viewport completo sin scroll */
 
-@media (min-width: 769px) {
+@media (min-width: 1440px) {
     .container {
         height: 100vh;
         overflow: hidden;
@@ -99,7 +99,21 @@ body {
         display: flex;
         flex-direction: column;
         min-height: 0;
-        /* overflow: hidden; */
+    }
+}
+
+
+/* Desktop mediano (1366x768): permitir scroll */
+
+@media (min-width: 769px) and (max-width: 1439px) {
+    .container {
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
     }
 }
 
@@ -674,13 +688,38 @@ header p {
 }
 
 
-/* Desktop: contenido en viewport fijo */
+/* Desktop grande: contenido en viewport fijo */
 
-@media (min-width: 769px) {
+@media (min-width: 1440px) {
     .content-wrapper {
         flex: 1;
         min-height: 0;
         overflow: hidden;
+    }
+}
+
+
+/* Desktop mediano (1366x768): permitir scroll con altura fija */
+
+@media (min-width: 769px) and (max-width: 1439px) {
+    .content-wrapper {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .map-section,
+    .code-section {
+        height: 550px;
+        min-height: 550px;
+        max-height: 550px;
+    }
+}
+
+
+/* Desktop grande: mayor área para código */
+
+@media (min-width: 1600px) {
+    .content-wrapper {
+        grid-template-columns: 1fr 500px;
     }
 }
 
@@ -1160,7 +1199,62 @@ footer p {
 
 /* Responsive Design */
 
-@media (max-width: 1280px) {
+
+/* Pantallas grandes (1920px+): diseño óptimo de 2 columnas */
+
+@media (min-width: 1920px) {
+    .content-wrapper {
+        grid-template-columns: 1fr 550px;
+    }
+}
+
+
+/* Desktop intermedio a grande (1440px - 1919px): diseño balanceado */
+
+@media (min-width: 1440px) and (max-width: 1919px) {
+    .content-wrapper {
+        grid-template-columns: 1fr 480px;
+    }
+}
+
+
+/* Desktop mediano (1280px - 1439px): ajustes para mejor visualización */
+
+@media (min-width: 1280px) and (max-width: 1439px) {
+    body {
+        overflow-y: auto;
+    }
+    .container {
+        padding: 12px;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+    main {
+        overflow: visible;
+    }
+    .content-wrapper {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+        overflow: visible;
+        gap: 16px;
+    }
+    .map-section {
+        height: 600px;
+        min-height: 600px;
+        max-height: 600px;
+    }
+    .code-section {
+        height: 600px;
+        min-height: 600px;
+        max-height: 600px;
+    }
+}
+
+
+/* Desktop pequeño (1024px - 1279px): diseño vertical */
+
+@media (max-width: 1279px) {
     body {
         overflow-y: auto;
     }
