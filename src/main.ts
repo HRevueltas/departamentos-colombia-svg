@@ -300,12 +300,6 @@ class App {
       });
     });
 
-    document.getElementById('btn-descargar')?.addEventListener('click', () => {
-      const selectedDept = deptSelect.value;
-      const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
-      this.svgExporter.downloadSingleDepartment(selectedDept, deptName);
-    });
-
     document.getElementById('btn-copiar')?.addEventListener('click', () => {
       const svgElement = this.mapRenderer.getSVGElement();
       if (svgElement) {
@@ -332,7 +326,16 @@ class App {
       const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
       const selectedDept = deptSelect.value;
       const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
-      this.svgExporter.downloadSingleDepartment(selectedDept, deptName);
+      const currentSVGCode = this.codeViewer.getCurrentSVGCode();
+      this.svgExporter.downloadCurrentSVG(currentSVGCode, deptName);
+    });
+
+    document.getElementById('btn-descargar')?.addEventListener('click', () => {
+      const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
+      const selectedDept = deptSelect.value;
+      const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
+      const currentSVGCode = this.codeViewer.getCurrentSVGCode();
+      this.svgExporter.downloadCurrentSVG(currentSVGCode, deptName);
     });
     
     document.getElementById('zoom-in')?.addEventListener('click', () => {

@@ -163,6 +163,12 @@ export class CodeViewer {
     });
   }
 
+  getCurrentSVGCode(): string {
+    return Array.from(this.codeDisplay.querySelectorAll('.line-content'))
+      .map(el => el.textContent)
+      .join('\n');
+  }
+
   private updateSizeInfo(svgString: string): void {
     const sizeDisplay = document.querySelector('.svg-size-info');
     

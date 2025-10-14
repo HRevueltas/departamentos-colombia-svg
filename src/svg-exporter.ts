@@ -204,4 +204,21 @@ export class SVGExporter {
 
     showNotification('SVG descargado exitosamente');
   }
+
+  downloadCurrentSVG(svgCode: string, departmentName: string): void {
+    if (!svgCode) {
+      showNotification('Error: No hay código SVG para descargar', 'error');
+      return;
+    }
+
+    const blob = new Blob([svgCode], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${departmentName}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showNotification('SVG descargado exitosamente');
+  }
 }
