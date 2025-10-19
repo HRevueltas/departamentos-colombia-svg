@@ -42,4 +42,8 @@ export interface AppState {
   };
   displayOption: DisplayOption;
   isAllDepartments: boolean;
+  jsonGenerated: {
+    departamento: boolean;
+    all: boolean;
+  };
 }

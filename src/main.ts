@@ -3,7 +3,7 @@ import { MapRenderer } from './map-renderer';
 import { SVGExporter } from './svg-exporter';
 import { CodeViewer } from './code-viewer';
 import { CONFIG, STATE } from './config';
-import { showLoading, showNotification } from './utils';
+import { showLoading, showNotification, calculateSVGSize } from './utils';
 import type { GeoJSONCollection, DisplayOption } from './types';
 
 class App {
@@ -203,7 +203,13 @@ class App {
             <div class="code-section" role="region" aria-label="Código fuente SVG">
               <div class="code-header">
                 <div class="code-header-left">
-                  <h3>Código SVG</h3>
+                  <div class="code-type-selector">
+                    <select id="code-type-select" aria-label="Tipo de código">
+                      <option value="svg">Código SVG</option>
+                      <option value="json">JSON Municipios</option>
+                      <option value="json-all" style="display: none;">JSON Departamentos</option>
+                    </select>
+                  </div>
                   <span class="svg-size-info" role="status" aria-live="polite">
                     <span class="size-placeholder">
                       <i class="fa-solid fa-circle-info"></i>
@@ -215,8 +221,8 @@ class App {
                   <button 
                     id="btn-descargar-code" 
                     class="download-code-btn" 
-                    title="Descargar archivo SVG"
-                    aria-label="Descargar archivo SVG"
+                    title="Descargar archivo"
+                    aria-label="Descargar archivo"
                     disabled
                   >
                     <i class="fa-solid fa-download"></i> Descargar
@@ -224,7 +230,7 @@ class App {
                   <button 
                     class="copy-code-btn" 
                     title="Copiar código al portapapeles"
-                    aria-label="Copiar código SVG al portapapeles"
+                    aria-label="Copiar código al portapapeles"
                   >
                     <i class="fa-solid fa-copy"></i> Copiar
                   </button>
@@ -234,7 +240,7 @@ class App {
                 id="code-display" 
                 class="code-display" 
                 role="code"
-                aria-label="Código SVG formateado"
+                aria-label="Código formateado"
                 tabindex="0"
               >
                 <div class="code-placeholder">
@@ -242,8 +248,35 @@ class App {
                   <p>Selecciona un departamento para ver el código SVG</p>
                 </div>
               </div>
+              <div 
+                id="json-display" 
+                class="code-display" 
+                role="code"
+                aria-label="JSON formateado"
+                tabindex="0"
+                style="display: none;"
+              >
+                <div class="code-placeholder">
+                  <i class="fa-solid fa-brackets-curly"></i>
+                  <p>Selecciona un departamento para ver los datos JSON</p>
+                </div>
+              </div>
+              <div 
+                id="json-all-display" 
+                class="code-display" 
+                role="code"
+                aria-label="JSON formateado de todos los departamentos"
+                tabindex="0"
+                style="display: none;"
+              >
+                <div class="code-placeholder">
+                  <i class="fa-solid fa-database"></i>
+                  <p>Selecciona 'Todos los departamentos' para ver los datos JSON completos</p>
+                </div>
+              </div>
             </div>
           </div>
+
         </main>
 
         <footer role="contentinfo">
@@ -297,6 +330,7 @@ class App {
         const option = (e.target as HTMLInputElement).value as DisplayOption;
         this.mapRenderer.updateDisplayOption(option);
         this.codeViewer.updateSVGCode();
+        this.codeViewer.updateJSONCode();
       });
     });
 
@@ -318,24 +352,56 @@ class App {
       this.svgExporter.downloadAllDepartments();
     });
 
-    document.querySelector('.copy-code-btn')?.addEventListener('click', () => {
-      this.codeViewer.copyCodeToClipboard();
-    });
-
-    document.getElementById('btn-descargar-code')?.addEventListener('click', () => {
-      const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
-      const selectedDept = deptSelect.value;
-      const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
-      const currentSVGCode = this.codeViewer.getCurrentSVGCode();
-      this.svgExporter.downloadCurrentSVG(currentSVGCode, deptName);
-    });
-
     document.getElementById('btn-descargar')?.addEventListener('click', () => {
       const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
       const selectedDept = deptSelect.value;
       const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
       const currentSVGCode = this.codeViewer.getCurrentSVGCode();
       this.svgExporter.downloadCurrentSVG(currentSVGCode, deptName);
+    });
+    
+    // Event listener para el selector de tipo de código
+    document.getElementById('code-type-select')?.addEventListener('change', (e) => {
+      const selectedType = (e.target as HTMLSelectElement).value;
+      
+      // Generar JSON bajo demanda
+      if (selectedType === 'json') {
+        this.codeViewer.generateJSONOnDemand('departamento');
+      } else if (selectedType === 'json-all') {
+        this.codeViewer.generateJSONOnDemand('all');
+      }
+      
+      this.switchCodeDisplay(selectedType);
+    });
+
+    // Event listeners para copiar y descargar (ahora manejan SVG o JSON según la selección)
+    document.querySelector('.copy-code-btn')?.addEventListener('click', () => {
+      const codeType = (document.getElementById('code-type-select') as HTMLSelectElement)?.value;
+      if (codeType === 'svg') {
+        this.codeViewer.copyCodeToClipboard();
+      } else if (codeType === 'json') {
+        this.codeViewer.copyJSONToClipboard();
+      } else if (codeType === 'json-all') {
+        this.codeViewer.copyAllJSONToClipboard();
+      }
+    });
+
+    document.getElementById('btn-descargar-code')?.addEventListener('click', () => {
+      const deptSelect = document.getElementById('departamento') as HTMLSelectElement;
+      const selectedDept = deptSelect.value;
+      const deptName = CONFIG.departmentCodes.find(d => d.code === selectedDept)?.name || '';
+      const codeType = (document.getElementById('code-type-select') as HTMLSelectElement)?.value;
+      
+      if (codeType === 'svg') {
+        const currentSVGCode = this.codeViewer.getCurrentSVGCode();
+        this.svgExporter.downloadCurrentSVG(currentSVGCode, deptName);
+      } else if (codeType === 'json') {
+        const jsonCode = this.codeViewer.getCurrentJSONCode();
+        this.downloadJSON(jsonCode, `${deptName}-municipios.json`);
+      } else if (codeType === 'json-all') {
+        const jsonCode = this.codeViewer.getCurrentAllJSONCode();
+        this.downloadJSON(jsonCode, 'colombia-todos-municipios.json');
+      }
     });
     
     document.getElementById('zoom-in')?.addEventListener('click', () => {
@@ -349,6 +415,15 @@ class App {
     document.getElementById('zoom-reset')?.addEventListener('click', () => {
       this.mapRenderer.resetZoom();
     });
+    
+    // Escuchar cuando se genera JSON para actualizar la UI
+    window.addEventListener('jsonGenerated', (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const codeTypeSelect = document.getElementById('code-type-select') as HTMLSelectElement;
+      if (codeTypeSelect) {
+        this.updateSizeInfoForCurrentDisplay(codeTypeSelect.value);
+      }
+    });
   }
 
   private handleDepartmentChange(value: string): void {
@@ -358,6 +433,7 @@ class App {
       this.disableButtons();
       this.codeViewer.clearCode();
       this.mapRenderer.clearMap();
+      this.hideJsonAllOption();
       if (mapPlaceholder) {
         mapPlaceholder.style.display = 'flex';
         mapPlaceholder.innerHTML = `
@@ -371,14 +447,23 @@ class App {
     if (value === 'ALL') {
       STATE.isAllDepartments = true;
       this.showDownloadAllButton();
+      this.showJsonAllOption();
       this.codeViewer.clearCode();
+      this.codeViewer.updateJSONCode();
       this.mapRenderer.clearMap();
+      
+      // Si el usuario tiene seleccionado JSON All, generar el JSON de todos
+      const codeTypeSelect = document.getElementById('code-type-select') as HTMLSelectElement;
+      if (codeTypeSelect && codeTypeSelect.value === 'json-all') {
+        this.codeViewer.generateJSONOnDemand('all');
+      }
+      
       if (mapPlaceholder) {
         mapPlaceholder.style.display = 'flex';
         mapPlaceholder.innerHTML = `
           <i class="fa-solid fa-layer-group"></i>
           <p>Opción "Todos los departamentos" seleccionada</p>
-          <p class="placeholder-hint">Usa el botón "Descargar Todos (ZIP)" para obtener todos los mapas</p>
+          <p class="placeholder-hint">Usa el botón "Descargar Todos (ZIP)" para obtener todos los mapas, o selecciona "JSON Todos los Departamentos" en el selector de código</p>
         `;
       }
       return;
@@ -390,6 +475,7 @@ class App {
 
     STATE.isAllDepartments = false;
     this.hideDownloadAllButton();
+    this.hideJsonAllOption();
 
     if (!STATE.allData.departamentos) return;
 
@@ -407,19 +493,34 @@ class App {
     }
 
     this.codeViewer.updateSVGCode();
+    this.codeViewer.updateJSONCode();
     this.enableButtons();
+    
+    // Si el usuario tiene seleccionado JSON, generar el JSON del nuevo departamento
+    const codeTypeSelect = document.getElementById('code-type-select') as HTMLSelectElement;
+    if (codeTypeSelect && codeTypeSelect.value === 'json') {
+      // Forzar regeneración cuando cambiamos de departamento y estamos en vista JSON
+      this.codeViewer.generateJSONOnDemand('departamento', true);
+    } else if (codeTypeSelect && codeTypeSelect.value === 'json-all') {
+      // Forzar regeneración del JSON completo si estamos en esa vista
+      this.codeViewer.generateJSONOnDemand('all', true);
+    }
   }
 
   private enableButtons(): void {
     (document.getElementById('btn-descargar') as HTMLButtonElement).disabled = false;
     (document.getElementById('btn-copiar') as HTMLButtonElement).disabled = false;
     (document.getElementById('btn-descargar-code') as HTMLButtonElement).disabled = false;
+    (document.getElementById('btn-descargar-json') as HTMLButtonElement | null)!.disabled = false;
+    (document.getElementById('btn-descargar-json-all') as HTMLButtonElement | null)!.disabled = false;
   }
 
   private disableButtons(): void {
     (document.getElementById('btn-descargar') as HTMLButtonElement).disabled = true;
     (document.getElementById('btn-copiar') as HTMLButtonElement).disabled = true;
     (document.getElementById('btn-descargar-code') as HTMLButtonElement).disabled = true;
+    (document.getElementById('btn-descargar-json') as HTMLButtonElement | null)!.disabled = true;
+    (document.getElementById('btn-descargar-json-all') as HTMLButtonElement | null)!.disabled = true;
   }
 
   private showDownloadAllButton(): void {
@@ -432,6 +533,28 @@ class App {
     document.getElementById('btn-descargar')!.style.display = 'inline-block';
     document.getElementById('btn-copiar')!.style.display = 'inline-block';
     document.getElementById('btn-descargar-todos')!.style.display = 'none';
+  }
+
+  private showJsonAllOption(): void {
+    const jsonAllOption = document.querySelector('#code-type-select option[value="json-all"]') as HTMLOptionElement;
+    if (jsonAllOption) {
+      jsonAllOption.style.display = 'block';
+    }
+  }
+
+  private hideJsonAllOption(): void {
+    const jsonAllOption = document.querySelector('#code-type-select option[value="json-all"]') as HTMLOptionElement;
+    const codeTypeSelect = document.getElementById('code-type-select') as HTMLSelectElement;
+    
+    if (jsonAllOption) {
+      jsonAllOption.style.display = 'none';
+    }
+    
+    // Si estaba seleccionada, volver a SVG
+    if (codeTypeSelect && codeTypeSelect.value === 'json-all') {
+      codeTypeSelect.value = 'svg';
+      this.switchCodeDisplay('svg');
+    }
   }
 
   private updateURL(departmentCode: string): void {
@@ -474,6 +597,86 @@ class App {
       .replace(/\s+/g, '-') // Espacios a guiones
       .replace(/[^a-z0-9-]/g, '') // Solo letras, números y guiones
       .replace(/-+/g, '-'); // Múltiples guiones a uno solo
+  }
+
+  private downloadJSON(jsonContent: string, filename: string): void {
+    if (!jsonContent) {
+      showNotification('Error: No hay datos JSON para descargar', 'error');
+      return;
+    }
+
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showNotification('JSON descargado exitosamente');
+  }
+
+  private switchCodeDisplay(codeType: string): void {
+    const codeDisplay = document.getElementById('code-display');
+    const jsonDisplay = document.getElementById('json-display');
+    const jsonAllDisplay = document.getElementById('json-all-display');
+
+    // Ocultar todos los displays
+    if (codeDisplay) codeDisplay.style.display = 'none';
+    if (jsonDisplay) jsonDisplay.style.display = 'none';
+    if (jsonAllDisplay) jsonAllDisplay.style.display = 'none';
+
+    // Mostrar el display correspondiente
+    if (codeType === 'svg') {
+      if (codeDisplay) codeDisplay.style.display = 'block';
+    } else if (codeType === 'json') {
+      if (jsonDisplay) jsonDisplay.style.display = 'block';
+    } else if (codeType === 'json-all') {
+      if (jsonAllDisplay) jsonAllDisplay.style.display = 'block';
+    }
+
+    // Actualizar el tamaño mostrado
+    this.updateSizeInfoForCurrentDisplay(codeType);
+  }
+
+  private updateSizeInfoForCurrentDisplay(codeType: string): void {
+    const sizeInfo = document.querySelector('.svg-size-info');
+    if (!sizeInfo) return;
+
+    let content = '';
+    if (codeType === 'svg') {
+      const codeDisplay = document.getElementById('code-display');
+      const hasContent = codeDisplay && !codeDisplay.querySelector('.code-placeholder');
+      if (hasContent) {
+        const svgCode = this.codeViewer.getCurrentSVGCode();
+        const sizeText = calculateSVGSize(svgCode);
+        content = `<span class="size-value">${sizeText}</span>`;
+      } else {
+        content = `<span class="size-placeholder"><i class="fa-solid fa-circle-info"></i> Sin selección</span>`;
+      }
+    } else if (codeType === 'json') {
+      const jsonDisplay = document.getElementById('json-display');
+      const hasContent = jsonDisplay && !jsonDisplay.querySelector('.code-placeholder');
+      if (hasContent) {
+        const jsonCode = this.codeViewer.getCurrentJSONCode();
+        const sizeText = calculateSVGSize(jsonCode);
+        content = `<span class="size-value">${sizeText}</span>`;
+      } else {
+        content = `<span class="size-placeholder"><i class="fa-solid fa-circle-info"></i> Sin selección</span>`;
+      }
+    } else if (codeType === 'json-all') {
+      const jsonAllDisplay = document.getElementById('json-all-display');
+      const hasContent = jsonAllDisplay && !jsonAllDisplay.querySelector('.code-placeholder');
+      if (hasContent) {
+        const jsonCode = this.codeViewer.getCurrentAllJSONCode();
+        const sizeText = calculateSVGSize(jsonCode);
+        content = `<span class="size-value">${sizeText}</span>`;
+      } else {
+        content = `<span class="size-placeholder"><i class="fa-solid fa-circle-info"></i> Sin selección</span>`;
+      }
+    }
+
+    sizeInfo.innerHTML = content;
   }
 }
 

@@ -51,7 +51,12 @@ export class MapRenderer {
   
     this.g = this.svg.append('g').attr('class', 'zoom-group');
     
-    const mapGroup = this.g.append('g').attr('class', 'municipios');
+    // Obtener el ID del departamento del primer feature
+    const departmentId = features[0]?.properties?.DPTO_CCDGO || '';
+    
+    const mapGroup = this.g.append('g')
+      .attr('class', 'municipios')
+      .attr('data-departamento-id', departmentId);
 
     mapGroup.selectAll('path')
       .data(features)
@@ -165,6 +170,66 @@ export class MapRenderer {
 
   getSVGElement(): SVGSVGElement {
     return this.svg.node() as SVGSVGElement;
+  }
+
+  getMunicipiosJSON(): string {
+    const svgElement = this.getSVGElement();
+    const municipios: any[] = [];
+    
+    const municipioElements = svgElement.querySelectorAll('.municipio');
+    const departamentoId = svgElement.querySelector('.municipios')?.getAttribute('data-departamento-id') || '';
+    
+    // Obtener el nombre del departamento desde CONFIG
+    const departamentoInfo = CONFIG.departmentCodes.find(d => d.code === departamentoId);
+    const departamentoNombre = departamentoInfo?.name || '';
+    
+    // Obtener viewBox del SVG
+    const viewBox = svgElement.getAttribute('viewBox') || '0 0 800 600';
+    
+    // Obtener estilos comunes del primer municipio
+    let commonFill = CONFIG.colors.fill;
+    let commonStroke = CONFIG.colors.stroke;
+    let commonStrokeWidth = CONFIG.colors.strokeWidth;
+    
+    if (municipioElements.length > 0) {
+      const firstElement = municipioElements[0] as SVGPathElement;
+      commonFill = firstElement.getAttribute('fill') || commonFill;
+      commonStroke = firstElement.getAttribute('stroke') || commonStroke;
+      commonStrokeWidth = firstElement.getAttribute('stroke-width') || String(commonStrokeWidth);
+    }
+    
+    municipioElements.forEach((element) => {
+      const pathElement = element as SVGPathElement;
+      const id = pathElement.getAttribute('data-element-id') || '';
+      const nombre = pathElement.getAttribute('name') || '';
+      const d = pathElement.getAttribute('d') || '';
+      
+      municipios.push({
+        id,
+        nombre,
+        d
+      });
+    });
+    
+    const jsonData = {
+      metadata: {
+        departamento: {
+          id: departamentoId,
+          nombre: departamentoNombre
+        },
+        svg: {
+          viewBox: viewBox
+        },
+        styles: {
+          fill: commonFill,
+          stroke: commonStroke,
+          strokeWidth: parseFloat(commonStrokeWidth)
+        }
+      },
+      municipios
+    };
+    
+    return JSON.stringify(jsonData, null, 2);
   }
 
   clearMap(): void {

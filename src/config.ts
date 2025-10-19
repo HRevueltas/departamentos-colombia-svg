@@ -54,5 +54,9 @@ export const STATE: AppState = {
     municipios: null
   },
   displayOption: 'map',
-  isAllDepartments: false
+  isAllDepartments: false,
+  jsonGenerated: {
+    departamento: false,
+    all: false
+  }
 };
